@@ -23,15 +23,26 @@ class MyGLRenderer(private val context: Context) : GLSurfaceView.Renderer {
     private lateinit var tunnelScene: TunnelScene
 
     override fun onSurfaceCreated(unused: GL10?, config: EGLConfig?) {
-        // Dark, atmospheric clear color
-        GLES20.glClearColor(0.02f, 0.02f, 0.05f, 1.0f)
+    // Dark, atmospheric clear color
+    GLES20.glClearColor(0.02f, 0.02f, 0.05f, 1.0f)
 
-        // Enable depth testing for 3D
-        GLES20.glEnable(GLES20.GL_DEPTH_TEST)
+    // Enable depth testing for 3D
+    GLES20.glEnable(GLES20.GL_DEPTH_TEST)
 
-        // Initialize your scene (PS2‑style: low poly, baked lighting, gritty textures)
-        tunnelScene = TunnelScene(context)
-    }
+    // 1. Load shader text from assets
+    val vertexShaderCode =
+        ShaderUtils.loadShaderFromAssets(context, "shaders/vertex.glsl")
+
+    val fragmentShaderCode =
+        ShaderUtils.loadShaderFromAssets(context, "shaders/fragment.glsl")
+
+    // 2. Compile + link shaders using your ShaderProgram class
+    val shaderProgram = ShaderProgram(vertexShaderCode, fragmentShaderCode)
+
+    // 3. Pass shader program into your scene
+    tunnelScene = TunnelScene(context, shaderProgram)
+}
+
 
     override fun onSurfaceChanged(unused: GL10?, width: Int, height: Int) {
         GLES20.glViewport(0, 0, width, height)
