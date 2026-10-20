@@ -7,7 +7,7 @@ import android.opengl.Matrix
 class TunnelScene(private val context: Context) {
 
     // Example: a single low‑poly corridor mesh
-    private val corridor = SimpleCorridor()
+    private val corridorMesh = ObjLoader.loadFromAssets(context, "models/corridor.obj")
 
     private val modelMatrix = FloatArray(16)
 
@@ -20,9 +20,23 @@ class TunnelScene(private val context: Context) {
     }
 
     fun draw(vpMatrix: FloatArray) {
-        val mvpMatrix = FloatArray(16)
-        Matrix.multiplyMM(mvpMatrix, 0, vpMatrix, 0, modelMatrix, 0)
+    // Compute MVP, model, normal matrices
+    val mvp = FloatArray(16)
+    Matrix.multiplyMM(mvp, 0, vpMatrix, 0, modelMatrix, 0)
 
-        corridor.draw(mvpMatrix)
-    }
+    val normalMatrix = FloatArray(9)
+    // Extract upper-left 3x3 from modelMatrix and invert/transpose for normals
+    // (you can simplify if you don’t scale non‑uniformly)
+
+    GLES20.glUseProgram(program)
+
+    // Bind buffers (positions, normals, uvs) from Mesh
+    // Set uniforms: uMVPMatrix, uModelMatrix, uNormalMatrix, lights, fog, texture
+    // Then draw:
+    GLES20.glDrawElements(
+        GLES20.GL_TRIANGLES,
+        mesh.indexCount,
+        GLES20.GL_UNSIGNED_INT,
+        mesh.indexBuffer
+    )
 }
